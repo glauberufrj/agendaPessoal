@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Agenda</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Minha Agenda</h1>
+            <a href="visualizacao.html" class="btn-link">Ver Agenda</a>
+        </div>
+
+        <div class="form-container">
+            <h2>Adicionar/Gerenciar Compromisso</h2>
+            <form id="form-compromisso">
+                <input type="text" id="titulo" placeholder="Título do compromisso" required>
+                
+                <div class="input-group">
+                    <label for="dataInicio">Início:</label>
+                    <input type="datetime-local" id="dataInicio" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="dataFim">Fim (Opcional):</label>
+                    <input type="datetime-local" id="dataFim">
+                </div>
+
+                <div class="input-group">
+                    <label for="participantes">Participantes (separados por vírgula):</label>
+                    <input type="text" id="participantes" placeholder="Ex: Ana, Bruno, Jessica">
+                </div>
+
+                <div class="input-group">
+                    <label for="recorrencia">Recorrência:</label>
+                    <select id="recorrencia">
+                        <option value="nenhuma">Não se repete</option>
+                        <option value="diaria">Diariamente</option>
+                        <option value="semanal">Semanalmente</option>
+                        <option value="mensal">Mensalmente</option>
+                    </select>
+                </div>
+                
+                <textarea id="descricao" placeholder="Descrição (opcional)"></textarea>
+                <button type="submit">Adicionar Compromisso</button>
+            </form>
+        </div>
+
+        <div class="agenda-container">
+            <h2>Meus Compromissos Cadastrados</h2>
+            <button id="btn-atualizar">Atualizar Lista</button>
+            <ul id="lista-compromissos">
+                </ul>
+        </div>
+    </div>
+
+    <div id="modal-edicao" class="modal">
+        <div class="modal-content">
+            <span class="fechar-modal">&times;</span>
+            <h2>Editar Compromisso</h2>
+            <form id="form-edicao">
+                <input type="hidden" id="edit-id">
+                <input type="text" id="edit-titulo" placeholder="Título" required>
+                <div class="input-group">
+                    <label for="edit-participantes">Participantes (separados por vírgula):</label>
+                    <input type="text" id="edit-participantes" placeholder="Ex: Ana, Bruno, Jessica">
+                </div>
+
+                <textarea id="edit-descricao" placeholder="Descrição"></textarea>
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

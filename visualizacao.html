@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualização da Agenda</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Agenda de Compromissos</h1>
+            <a href="index.html" class="btn-link">Gerenciar Compromissos</a>
+        </div>
+
+        <div class="navegacao-mes">
+            <button id="btn-mes-anterior">&lt; Anterior</button>
+            <h2 id="mes-ano-exibido">Carregando...</h2>
+            <button id="btn-mes-proximo">Próximo &gt;</button>
+        </div>
+        
+        <div class="agenda-container-view">
+            <button id="btn-atualizar">Recarregar Dados</button> 
+            <ul id="lista-compromissos">
+                </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
