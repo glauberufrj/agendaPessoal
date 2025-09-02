@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Agenda</title>
+    <title>Adicionar Compromisso</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1>Minha Agenda</h1>
-            <a href="visualizacao.html" class="btn-link">Ver Agenda</a>
+            <h1>Novo Compromisso</h1>
+            <a href="visualizacao.html" class="btn-link">Ver Agenda Completa</a>
         </div>
 
         <div class="form-container">
-            <h2>Adicionar/Gerenciar Compromisso</h2>
             <form id="form-compromisso">
-                <input type="text" id="titulo" placeholder="Título do compromisso" required>
+                <div class="input-group">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" placeholder="Título do compromisso" required>
+                </div>
                 
                 <div class="input-group">
                     <label for="dataInicio">Início:</label>
@@ -49,31 +51,7 @@
             </form>
         </div>
 
-        <div class="agenda-container">
-            <h2>Meus Compromissos Cadastrados</h2>
-            <button id="btn-atualizar">Atualizar Lista</button>
-            <ul id="lista-compromissos">
-                </ul>
         </div>
-    </div>
-
-    <div id="modal-edicao" class="modal">
-        <div class="modal-content">
-            <span class="fechar-modal">&times;</span>
-            <h2>Editar Compromisso</h2>
-            <form id="form-edicao">
-                <input type="hidden" id="edit-id">
-                <input type="text" id="edit-titulo" placeholder="Título" required>
-                <div class="input-group">
-                    <label for="edit-participantes">Participantes (separados por vírgula):</label>
-                    <input type="text" id="edit-participantes" placeholder="Ex: Ana, Bruno, Jessica">
-                </div>
-
-                <textarea id="edit-descricao" placeholder="Descrição"></textarea>
-                <button type="submit">Salvar Alterações</button>
-            </form>
-        </div>
-    </div>
 
     <script src="script.js"></script>
 </body>

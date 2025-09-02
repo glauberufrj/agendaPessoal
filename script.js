@@ -1,4 +1,3 @@
-// Cole este código completo no seu script.js
 document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = '/api/compromissos';
@@ -17,7 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fecharModal = document.getElementsByClassName('fechar-modal')[0];
 
     const init = async () => {
-        todosOsCompromissos = await getCompromissosDaAPI();
+        // Na página de cadastro, não precisamos mais buscar todos os compromissos
+        if (isPaginaVisualizacao) {
+            todosOsCompromissos = await getCompromissosDaAPI();
+        }
         renderizarAgenda();
     };
 
@@ -33,13 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const renderizarAgenda = () => {
-        if (!listaCompromissos) return;
-        listaCompromissos.innerHTML = '';
         if (isPaginaVisualizacao) {
+            if (!listaCompromissos) return;
+            listaCompromissos.innerHTML = '';
             renderizarAgendaPaginada();
-        } else {
-            renderizarAgendaGestao();
         }
+        // Na página de cadastro, esta função não faz mais nada
     };
 
     const renderizarAgendaPaginada = () => {
@@ -73,102 +74,70 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const renderizarAgendaGestao = () => {
-        const compromissosOrdenados = [...todosOsCompromissos].sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio));
-        if (compromissosOrdenados.length === 0) {
-             listaCompromissos.innerHTML = '<li>Nenhum compromisso cadastrado.</li>';
-             return;
-        }
-        compromissosOrdenados.forEach(comp => {
-            const item = document.createElement('li');
-            item.className = 'compromisso-item';
-            item.dataset.id = comp.id;
-            let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
-            const inicio = new Date(comp.dataInicio);
-            let dataFormatada = inicio.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
-            if (comp.dataFim) {
-                const fim = new Date(comp.dataFim);
-                dataFormatada += ` até ${fim.toLocaleTimeString('pt-BR', { timeStyle: 'short' })}`;
-            }
-            const tagRecorrencia = comp.recorrencia && comp.recorrencia !== 'nenhuma' ? `<span class="recorrencia-tag">${comp.recorrencia}</span>` : '';
-            const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
-            item.innerHTML = `<div class="compromisso-info">
-                <strong>${comp.titulo} ${tagRecorrencia}</strong>
-                <small>${dataFormatada}</small>
-                <p>${comp.descricao || ''}</p>
-                ${participantesHTML}
-            </div>${acoesHTML}`;
-            listaCompromissos.appendChild(item);
-        });
-    };
-
-    const manipularAcoesCompromisso = async (e) => {
-        const alvo = e.target;
-        const btnDeletar = alvo.closest('.btn-deletar');
-        const btnEditar = alvo.closest('.btn-editar');
-
-        if (!btnDeletar && !btnEditar) {
-            return;
-        }
-
-        const item = alvo.closest('.compromisso-item-view, .compromisso-item');
-        if (!item) return;
-        const id = Number(item.dataset.id);
-
-        if (btnDeletar) {
-            if (confirm('Tem certeza que deseja deletar este compromisso?')) {
-                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                await init();
-            }
-        }
-
-        if (btnEditar) {
-            const compParaEditar = todosOsCompromissos.find(comp => Number(comp.id) === id);
-            if (compParaEditar) {
-                document.getElementById('edit-id').value = compParaEditar.id;
-                document.getElementById('edit-titulo').value = compParaEditar.titulo;
-                document.getElementById('edit-dataInicio').value = compParaEditar.dataInicio;
-                document.getElementById('edit-dataFim').value = compParaEditar.dataFim;
-                document.getElementById('edit-recorrencia').value = compParaEditar.recorrencia;
-                document.getElementById('edit-descricao').value = compParaEditar.descricao;
-                document.getElementById('edit-participantes').value = compParaEditar.participantes ? compParaEditar.participantes.join(', ') : '';
-                modal.style.display = "block";
-            }
-        }
-    };
-
-    const salvarEdicao = async (e) => {
-        e.preventDefault();
-        const id = Number(document.getElementById('edit-id').value);
-        const participantesInput = document.getElementById('edit-participantes').value;
-        const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
-        const compromissoEditado = {
-            titulo: document.getElementById('edit-titulo').value,
-            dataInicio: document.getElementById('edit-dataInicio').value,
-            dataFim: document.getElementById('edit-dataFim').value || null,
-            recorrencia: document.getElementById('edit-recorrencia').value,
-            descricao: document.getElementById('edit-descricao').value,
-            participantes: participantes
-        };
-        await fetch(`${API_URL}/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(compromissoEditado)
-        });
-        modal.style.display = "none";
-        await init();
-    };
-
-    if (listaCompromissos) {
-        listaCompromissos.addEventListener('click', manipularAcoesCompromisso);
-    }
-    if (modal) {
-        formEdicao.addEventListener('submit', salvarEdicao);
-        fecharModal.onclick = () => { modal.style.display = "none"; }
-        window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; }}
-    }
+    // --- FUNÇÕES DE AÇÃO E EVENTOS (Agora só se aplicam à página de visualização) ---
 
     if (isPaginaVisualizacao) {
+        const manipularAcoesCompromisso = async (e) => {
+            const alvo = e.target;
+            const btnDeletar = alvo.closest('.btn-deletar');
+            const btnEditar = alvo.closest('.btn-editar');
+            if (!btnDeletar && !btnEditar) return;
+            const item = alvo.closest('.compromisso-item-view');
+            if (!item) return;
+            const id = Number(item.dataset.id);
+
+            if (btnDeletar) {
+                if (confirm('Tem certeza que deseja deletar este compromisso?')) {
+                    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                    await init();
+                }
+            }
+            if (btnEditar) {
+                const compParaEditar = todosOsCompromissos.find(comp => Number(comp.id) === id);
+                if (compParaEditar) {
+                    document.getElementById('edit-id').value = compParaEditar.id;
+                    document.getElementById('edit-titulo').value = compParaEditar.titulo;
+                    document.getElementById('edit-dataInicio').value = compParaEditar.dataInicio;
+                    document.getElementById('edit-dataFim').value = compParaEditar.dataFim;
+                    document.getElementById('edit-recorrencia').value = compParaEditar.recorrencia;
+                    document.getElementById('edit-descricao').value = compParaEditar.descricao;
+                    document.getElementById('edit-participantes').value = compParaEditar.participantes ? compParaEditar.participantes.join(', ') : '';
+                    modal.style.display = "block";
+                }
+            }
+        };
+
+        const salvarEdicao = async (e) => {
+            e.preventDefault();
+            const id = Number(document.getElementById('edit-id').value);
+            const participantesInput = document.getElementById('edit-participantes').value;
+            const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
+            const compromissoEditado = {
+                titulo: document.getElementById('edit-titulo').value,
+                dataInicio: document.getElementById('edit-dataInicio').value,
+                dataFim: document.getElementById('edit-dataFim').value || null,
+                recorrencia: document.getElementById('edit-recorrencia').value,
+                descricao: document.getElementById('edit-descricao').value,
+                participantes: participantes
+            };
+            await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(compromissoEditado)
+            });
+            modal.style.display = "none";
+            await init();
+        };
+
+        if (listaCompromissos) {
+            listaCompromissos.addEventListener('click', manipularAcoesCompromisso);
+        }
+        if (modal) {
+            formEdicao.addEventListener('submit', salvarEdicao);
+            fecharModal.onclick = () => { modal.style.display = "none"; }
+            window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; }}
+        }
+        
         const btnMesAnterior = document.getElementById('btn-mes-anterior');
         const btnMesProximo = document.getElementById('btn-mes-proximo');
         btnMesAnterior.addEventListener('click', () => {
@@ -179,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dataExibida.setMonth(dataExibida.getMonth() + 1);
             renderizarAgenda();
         });
-    } else {
+    } else { // Lógica da página de Adicionar (index.html)
         const adicionarCompromisso = async (e) => {
             e.preventDefault();
             const participantesInput = document.getElementById('participantes').value;
@@ -187,18 +156,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const novoCompromisso = {
                 titulo: document.getElementById('titulo').value,
                 dataInicio: document.getElementById('dataInicio').value,
-                dataFim: document.getElementById('dataFim').value || null, // CORRIGIDO: Era 'edit-dataFim'
+                dataFim: document.getElementById('dataFim').value || null,
                 recorrencia: document.getElementById('recorrencia').value,
                 descricao: document.getElementById('descricao').value,
                 participantes: participantes
             };
-            await fetch(API_URL, {
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novoCompromisso)
             });
-            formCompromisso.reset();
-            await init();
+
+            if (response.ok) {
+                alert('Compromisso adicionado com sucesso!');
+                formCompromisso.reset();
+            } else {
+                alert('Ocorreu um erro ao adicionar o compromisso.');
+            }
         };
         formCompromisso.addEventListener('submit', adicionarCompromisso);
     }
