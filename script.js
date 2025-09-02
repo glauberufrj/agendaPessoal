@@ -10,11 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaCompromissos = document.getElementById('lista-compromissos');
     const btnAtualizar = document.getElementById('btn-atualizar');
     
-    // Elementos da página de GESTÃO
     const formCompromisso = document.getElementById('form-compromisso');
     const isPaginaVisualizacao = !formCompromisso;
 
-    // Elementos do Modal (agora em escopo global para ambas as páginas)
     const modal = document.getElementById('modal-edicao');
     const formEdicao = document.getElementById('form-edicao');
     const fecharModal = document.getElementsByClassName('fechar-modal')[0];
@@ -53,27 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderizarAgendaPaginada = () => {
         const mesAnoTitulo = document.getElementById('mes-ano-exibido');
         mesAnoTitulo.textContent = dataExibida.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-
         const compromissosDoMes = todosOsCompromissos.filter(comp => {
             const dataComp = new Date(comp.dataInicio);
-            return dataComp.getMonth() === dataExibida.getMonth() &&
-                   dataComp.getFullYear() === dataExibida.getFullYear();
+            return dataComp.getMonth() === dataExibida.getMonth() && dataComp.getFullYear() === dataExibida.getFullYear();
         }).sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio));
-
         if (compromissosDoMes.length === 0) {
             listaCompromissos.innerHTML = '<li>Nenhum compromisso para este mês.</li>';
             return;
         }
-
         compromissosDoMes.forEach(comp => {
             const item = document.createElement('li');
             item.className = 'compromisso-item-view';
             item.dataset.id = comp.id;
             const dia = new Date(comp.dataInicio).getDate();
-            
             let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
             const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
-
             item.innerHTML = `
                 <div class="compromisso-dia">${dia}</div>
                 <div class="compromisso-detalhes">
@@ -93,14 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
              listaCompromissos.innerHTML = '<li>Nenhum compromisso cadastrado.</li>';
              return;
         }
-        
         compromissosOrdenados.forEach(comp => {
             const item = document.createElement('li');
             item.className = 'compromisso-item';
             item.dataset.id = comp.id;
-
             let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
-
             const inicio = new Date(comp.dataInicio);
             let dataFormatada = inicio.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
             if (comp.dataFim) {
@@ -109,30 +98,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const tagRecorrencia = comp.recorrencia && comp.recorrencia !== 'nenhuma' ? `<span class="recorrencia-tag">${comp.recorrencia}</span>` : '';
             const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
-            
             item.innerHTML = `<div class="compromisso-info">
                 <strong>${comp.titulo} ${tagRecorrencia}</strong>
                 <small>${dataFormatada}</small>
                 <p>${comp.descricao || ''}</p>
                 ${participantesHTML}
             </div>${acoesHTML}`;
-
             listaCompromissos.appendChild(item);
         });
     };
 
-    // --- FUNÇÕES DE AÇÃO E EVENTOS (COM A CORREÇÃO) ---
+    // --- FUNÇÕES DE AÇÃO E EVENTOS ---
 
     const manipularAcoesCompromisso = async (e) => {
+        // !! LINHA DE TESTE ADICIONADA !!
+        console.log("Clique detectado na lista! Alvo do clique:", e.target);
+
         const alvo = e.target;
-        
-        // CORREÇÃO: Em vez de checar a classe do 'alvo', usamos 'closest' para encontrar o botão mais próximo.
-        // Isso funciona mesmo se o clique for no texto dentro do botão.
         const btnDeletar = alvo.closest('.btn-deletar');
         const btnEditar = alvo.closest('.btn-editar');
 
-        // Se não clicamos em nenhum botão de ação, não fazemos nada.
         if (!btnDeletar && !btnEditar) {
+            // !! SEGUNDA LINHA DE TESTE ADICIONADA !!
+            console.log("O clique não foi em um botão de ação. Ignorando.");
             return;
         }
 
@@ -193,8 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; }}
     }
 
-    // --- LÓGICA ESPECÍFICA DE CADA PÁGINA ---
-
     if (isPaginaVisualizacao) {
         const btnMesAnterior = document.getElementById('btn-mes-anterior');
         const btnMesProximo = document.getElementById('btn-mes-proximo');
@@ -214,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const novoCompromisso = {
                 titulo: document.getElementById('titulo').value,
                 dataInicio: document.getElementById('dataInicio').value,
-                dataFim: document.getElementById('dataFim').value || null,
+                dataFim: document.getElementById('edit-dataFim').value || null,
                 recorrencia: document.getElementById('recorrencia').value,
                 descricao: document.getElementById('descricao').value,
                 participantes: participantes
