@@ -2,11 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = '/api/compromissos';
 
-    // --- VARIÁVEIS DE ESTADO ---
     let todosOsCompromissos = []; 
     let dataExibida = new Date(); 
 
-    // --- SELETORES DE ELEMENTOS ---
     const listaCompromissos = document.getElementById('lista-compromissos');
     const btnAtualizar = document.getElementById('btn-atualizar');
     
@@ -16,8 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal-edicao');
     const formEdicao = document.getElementById('form-edicao');
     const fecharModal = document.getElementsByClassName('fechar-modal')[0];
-
-    // --- INICIALIZAÇÃO DA PÁGINA ---
 
     const init = async () => {
         todosOsCompromissos = await getCompromissosDaAPI();
@@ -35,12 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // --- LÓGICA DE RENDERIZAÇÃO ---
-
     const renderizarAgenda = () => {
         if (!listaCompromissos) return;
         listaCompromissos.innerHTML = '';
-        
         if (isPaginaVisualizacao) {
             renderizarAgendaPaginada();
         } else {
@@ -108,8 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- FUNÇÕES DE AÇÃO E EVENTOS ---
-
     const manipularAcoesCompromisso = async (e) => {
         const alvo = e.target;
         const btnDeletar = alvo.closest('.btn-deletar');
@@ -131,17 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (btnEditar) {
-            // !! LOGS DE DIAGNÓSTICO ADICIONADOS AQUI !!
-            console.log("Botão EDITAR clicado. Procurando pelo ID:", id, "(tipo:", typeof id, ")");
-            const compParaEditar = todosOsCompromissos.find(comp => {
-                // Adicionamos um log para cada item que está sendo comparado
-                console.log(`Comparando ID do clique (${id}) com ID da lista (${comp.id}) (tipo: ${typeof comp.id})`);
-                return comp.id === id;
-            });
+            // A CORREÇÃO FINAL ESTÁ AQUI: Number(comp.id)
+            const compParaEditar = todosOsCompromissos.find(comp => Number(comp.id) === id);
 
             if (compParaEditar) {
-                console.log("✅ Compromisso encontrado:", compParaEditar);
-                console.log("Tentando abrir o modal...");
                 document.getElementById('edit-id').value = compParaEditar.id;
                 document.getElementById('edit-titulo').value = compParaEditar.titulo;
                 document.getElementById('edit-dataInicio').value = compParaEditar.dataInicio;
@@ -150,11 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('edit-descricao').value = compParaEditar.descricao;
                 document.getElementById('edit-participantes').value = compParaEditar.participantes ? compParaEditar.participantes.join(', ') : '';
                 modal.style.display = "block";
-                console.log("✅ Modal deveria estar visível.");
-            } else {
-                console.error("❌ ERRO: Compromisso com ID", id, "não foi encontrado na lista 'todosOsCompromissos'.");
-                console.log("Isso pode acontecer se o tipo do ID for diferente (ex: número vs texto). Verifique a comparação acima.");
-                console.log("Lista completa de compromissos para depuração:", todosOsCompromissos);
             }
         }
     };
@@ -209,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const novoCompromisso = {
                 titulo: document.getElementById('titulo').value,
                 dataInicio: document.getElementById('dataInicio').value,
-                dataFim: document.getElementById('edit-dataFim').value || null,
+                dataFim: document.getElementById('dataFim').value || null,
                 recorrencia: document.getElementById('recorrencia').value,
                 descricao: document.getElementById('descricao').value,
                 participantes: participantes
