@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // A URL da nossa API agora é um caminho relativo ao nosso próprio site.
-    // O Netlify irá redirecionar chamadas para /api/* para nossas funções.
     const API_URL = '/api/compromissos';
 
     // --- VARIÁVEIS DE ESTADO ---
-    let todosOsCompromissos = []; // Armazenará todos os eventos da API
-    let dataExibida = new Date(); // Guarda o mês e ano que estão sendo exibidos
+    let todosOsCompromissos = []; 
+    let dataExibida = new Date(); 
 
     // --- SELETORES DE ELEMENTOS ---
     const listaCompromissos = document.getElementById('lista-compromissos');
@@ -15,6 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elementos da página de GESTÃO
     const formCompromisso = document.getElementById('form-compromisso');
     const isPaginaVisualizacao = !formCompromisso;
+
+    // Elementos do Modal (agora em escopo global para ambas as páginas)
+    const modal = document.getElementById('modal-edicao');
+    const formEdicao = document.getElementById('form-edicao');
+    const fecharModal = document.getElementsByClassName('fechar-modal')[0];
 
     // --- INICIALIZAÇÃO DA PÁGINA ---
 
@@ -65,14 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
         compromissosDoMes.forEach(comp => {
             const item = document.createElement('li');
             item.className = 'compromisso-item-view';
+            item.dataset.id = comp.id; // Adiciona o ID para as ações
             const dia = new Date(comp.dataInicio).getDate();
             
-            let participantesHTML = '';
-            if (comp.participantes && comp.participantes.length > 0) {
-                participantesHTML = `<div class="participantes-container">
-                    ${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}
-                </div>`;
-            }
+            let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
+            const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
 
             item.innerHTML = `
                 <div class="compromisso-dia">${dia}</div>
@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <small>${new Date(comp.dataInicio).toLocaleTimeString('pt-BR', {timeStyle: 'short'})}</small>
                     ${participantesHTML}
                 </div>
+                ${acoesHTML}
             `;
             listaCompromissos.appendChild(item);
         });
@@ -98,12 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.className = 'compromisso-item';
             item.dataset.id = comp.id;
 
-            let participantesHTML = '';
-            if (comp.participantes && comp.participantes.length > 0) {
-                participantesHTML = `<div class="participantes-container">
-                    ${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}
-                </div>`;
-            }
+            let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
 
             const inicio = new Date(comp.dataInicio);
             let dataFormatada = inicio.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
@@ -123,10 +119,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
             listaCompromissos.appendChild(item);
         });
+    };
+
+    // --- FUNÇÕES DE AÇÃO E EVENTOS (Agora compartilhadas e globais) ---
+
+    const manipularAcoesCompromisso = async (e) => {
+        const alvo = e.target;
+        // Seletor unificado que funciona em ambas as páginas
+        const item = alvo.closest('.compromisso-item-view, .compromisso-item');
+        if (!item) return;
+        const id = Number(item.dataset.id);
+
+        if (alvo.classList.contains('btn-deletar')) {
+            if (confirm('Tem certeza que deseja deletar este compromisso?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                await init(); // Recarrega os dados em ambas as páginas
+            }
+        }
+
+        if (alvo.classList.contains('btn-editar')) {
+            const compParaEditar = todosOsCompromissos.find(comp => comp.id === id);
+            if (compParaEditar) {
+                document.getElementById('edit-id').value = compParaEditar.id;
+                document.getElementById('edit-titulo').value = compParaEditar.titulo;
+                document.getElementById('edit-dataInicio').value = compParaEditar.dataInicio;
+                document.getElementById('edit-dataFim').value = compParaEditar.dataFim;
+                document.getElementById('edit-recorrencia').value = compParaEditar.recorrencia;
+                document.getElementById('edit-descricao').value = compParaEditar.descricao;
+                document.getElementById('edit-participantes').value = compParaEditar.participantes ? compParaEditar.participantes.join(', ') : '';
+                modal.style.display = "block";
+            }
+        }
+    };
+
+    const salvarEdicao = async (e) => {
+        e.preventDefault();
+        const id = Number(document.getElementById('edit-id').value);
+        const participantesInput = document.getElementById('edit-participantes').value;
+        const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
+        const compromissoEditado = {
+            titulo: document.getElementById('edit-titulo').value,
+            dataInicio: document.getElementById('edit-dataInicio').value,
+            dataFim: document.getElementById('edit-dataFim').value || null,
+            recorrencia: document.getElementById('edit-recorrencia').value,
+            descricao: document.getElementById('edit-descricao').value,
+            participantes: participantes
+        };
+        await fetch(`${API_URL}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(compromissoEditado)
+        });
+        modal.style.display = "none";
+        await init();
+    };
+
+    // Adiciona o listener para a lista de compromissos (funciona em ambas as páginas)
+    if (listaCompromissos) {
+        listaCompromissos.addEventListener('click', manipularAcoesCompromisso);
+    }
+    // Adiciona os listeners para o modal de edição (funciona em ambas as páginas)
+    if (modal) {
+        formEdicao.addEventListener('submit', salvarEdicao);
+        fecharModal.onclick = () => { modal.style.display = "none"; }
+        window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; }}
     }
 
-    // --- FUNÇÕES DE NAVEGAÇÃO ---
+    // --- LÓGICA ESPECÍFICA DE CADA PÁGINA ---
+
     if (isPaginaVisualizacao) {
+        // Lógica de navegação dos meses
         const btnMesAnterior = document.getElementById('btn-mes-anterior');
         const btnMesProximo = document.getElementById('btn-mes-proximo');
 
@@ -139,14 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dataExibida.setMonth(dataExibida.getMonth() + 1);
             renderizarAgenda();
         });
-    }
-    
-    // --- LÓGICA DA PÁGINA DE GESTÃO ---
-    if (!isPaginaVisualizacao) {
-        const modal = document.getElementById('modal-edicao');
-        const formEdicao = document.getElementById('form-edicao');
-        const fecharModal = document.getElementsByClassName('fechar-modal')[0];
-        
+    } else {
+        // Lógica do formulário de adicionar compromisso
         const adicionarCompromisso = async (e) => {
             e.preventDefault();
             const participantesInput = document.getElementById('participantes').value;
@@ -170,63 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formCompromisso.reset();
             await init();
         };
-        
-        const manipularAcoesCompromisso = async (e) => {
-            const alvo = e.target;
-            const item = alvo.closest('.compromisso-item');
-            if (!item) return;
-            const id = Number(item.dataset.id);
-
-            if (alvo.classList.contains('btn-deletar')) {
-                if (confirm('Tem certeza?')) {
-                    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                    await init();
-                }
-            }
-
-            if (alvo.classList.contains('btn-editar')) {
-                const compParaEditar = todosOsCompromissos.find(comp => comp.id === id);
-                document.getElementById('edit-id').value = compParaEditar.id;
-                document.getElementById('edit-titulo').value = compParaEditar.titulo;
-                document.getElementById('edit-dataInicio').value = compParaEditar.dataInicio;
-                document.getElementById('edit-dataFim').value = compParaEditar.dataFim;
-                document.getElementById('edit-recorrencia').value = compParaEditar.recorrencia;
-                document.getElementById('edit-descricao').value = compParaEditar.descricao;
-                document.getElementById('edit-participantes').value = compParaEditar.participantes ? compParaEditar.participantes.join(', ') : '';
-                modal.style.display = "block";
-            }
-        };
-
-        const salvarEdicao = async (e) => {
-            e.preventDefault();
-            const id = Number(document.getElementById('edit-id').value);
-            const participantesInput = document.getElementById('edit-participantes').value;
-            const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
-
-            const compromissoEditado = {
-                titulo: document.getElementById('edit-titulo').value,
-                dataInicio: document.getElementById('edit-dataInicio').value,
-                dataFim: document.getElementById('edit-dataFim').value || null,
-                recorrencia: document.getElementById('edit-recorrencia').value,
-                descricao: document.getElementById('edit-descricao').value,
-                participantes: participantes
-            };
-            
-            await fetch(`${API_URL}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(compromissoEditado)
-            });
-            
-            modal.style.display = "none";
-            await init();
-        };
-
         formCompromisso.addEventListener('submit', adicionarCompromisso);
-        listaCompromissos.addEventListener('click', manipularAcoesCompromisso);
-        formEdicao.addEventListener('submit', salvarEdicao);
-        fecharModal.onclick = () => { modal.style.display = "none"; }
-        window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; }}
     }
 
     if (btnAtualizar) {

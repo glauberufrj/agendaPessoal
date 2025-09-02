@@ -209,3 +209,75 @@ button:hover { background-color: #2980b9; }
     font-size: 0.85em;
     font-weight: 500;
 }
+
+/* =================================== */
+/* ==       ESTILOS RESPONSIVOS     == */
+/* =================================== */
+
+/* Para telas com largura máxima de 768px (tablets e celulares) */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    /* Ajusta a navegação dos meses para caber melhor */
+    .navegacao-mes {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    #mes-ano-exibido {
+        width: 100%;
+        text-align: center;
+        order: -1; /* Joga o título para cima */
+        font-size: 1.3em;
+    }
+
+    /* A mudança mais importante: layout dos compromissos */
+    .compromisso-item-view {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .compromisso-dia {
+        font-size: 1.2em;
+        padding: 5px 10px;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        margin-right: 0;
+    }
+
+    .compromisso-detalhes {
+        width: 100%;
+    }
+
+    .compromisso-acoes {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    /* Garante que o modal de edição funcione bem no celular */
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
+    }
+}
