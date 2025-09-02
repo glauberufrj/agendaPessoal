@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = '/api/compromissos';
+
     let todosOsCompromissos = []; 
     let dataExibida = new Date(); 
 
@@ -40,17 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderizarProximoEvento = () => {
         const proximoEventoContainer = document.getElementById('proximo-evento-container');
         if (!proximoEventoContainer) return;
-
         const agora = new Date();
         const eventosFuturos = todosOsCompromissos
             .filter(comp => new Date(comp.dataInicio) > agora)
             .sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio));
-
         if (eventosFuturos.length > 0) {
             const proximoEvento = eventosFuturos[0];
             const data = new Date(proximoEvento.dataInicio);
             const dataFormatada = data.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
-            
             proximoEventoContainer.innerHTML = `
                 <h3>Próximo Evento</h3>
                 <p><strong>${proximoEvento.titulo}</strong></p>
@@ -77,39 +75,43 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // --- NOVA LÓGICA DE AGRUPAMENTO ---
         const gruposDeEventos = [];
-        compromissosDoMes.forEach(evento => {
-            const ultimoGrupo = gruposDeEventos[gruposDeEventos.length - 1];
-            const dataEvento = new Date(evento.dataInicio);
-            
-            // Verifica se pode agrupar com o evento anterior
-            if (ultimoGrupo && 
-                ultimoGrupo.titulo === evento.titulo && 
-                (new Date(ultimoGrupo.dataFim).setDate(new Date(ultimoGrupo.dataFim).getDate() + 1) === dataEvento.setHours(0,0,0,0))) 
-            {
-                // Se sim, apenas atualiza a data final do grupo
-                ultimoGrupo.dataFim = dataEvento;
-            } else {
-                // Se não, cria um novo grupo
-                gruposDeEventos.push({
-                    id: evento.id, // Usa o ID do primeiro evento do grupo
-                    titulo: evento.titulo,
-                    dataInicio: dataEvento,
-                    dataFim: dataEvento, // Inicialmente, o fim é igual ao início
-                    hora: new Date(evento.dataInicio).toLocaleTimeString('pt-BR', {timeStyle: 'short'}),
-                    participantes: evento.participantes
-                });
-            }
-        });
+        if (compromissosDoMes.length > 0) {
+            compromissosDoMes.forEach(evento => {
+                const ultimoGrupo = gruposDeEventos[gruposDeEventos.length - 1];
+                const dataEventoAtual = new Date(evento.dataInicio);
+                dataEventoAtual.setHours(0, 0, 0, 0);
 
-        // --- RENDERIZAÇÃO BASEADA NOS GRUPOS ---
+                let agrupado = false;
+                if (ultimoGrupo) {
+                    const diaSeguinteAoUltimo = new Date(ultimoGrupo.dataFim);
+                    diaSeguinteAoUltimo.setHours(0, 0, 0, 0);
+                    diaSeguinteAoUltimo.setDate(diaSeguinteAoUltimo.getDate() + 1);
+
+                    if (ultimoGrupo.titulo === evento.titulo && diaSeguinteAoUltimo.getTime() === dataEventoAtual.getTime()) {
+                        ultimoGrupo.dataFim = new Date(evento.dataInicio);
+                        agrupado = true;
+                    }
+                }
+
+                if (!agrupado) {
+                    gruposDeEventos.push({
+                        id: evento.id,
+                        titulo: evento.titulo,
+                        dataInicio: new Date(evento.dataInicio),
+                        dataFim: new Date(evento.dataInicio),
+                        hora: new Date(evento.dataInicio).toLocaleTimeString('pt-BR', {timeStyle: 'short'}),
+                        participantes: evento.participantes
+                    });
+                }
+            });
+        }
+
         gruposDeEventos.forEach(grupo => {
             const item = document.createElement('li');
             item.className = 'compromisso-item-view';
             item.dataset.id = grupo.id;
 
-            // Formatação do dia e dia da semana
             const diaInicio = grupo.dataInicio.getDate();
             const diaFim = grupo.dataFim.getDate();
             const semanaInicio = grupo.dataInicio.toLocaleString('pt-BR', { weekday: 'long' });
@@ -141,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             listaCompromissos.appendChild(item);
         });
     };
-
+    
     if (isPaginaVisualizacao) {
         const manipularAcoesCompromisso = async (e) => {
             const alvo = e.target;
