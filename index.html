@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Compromisso</title>
     <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body>
 
@@ -23,13 +27,11 @@
                 
                 <div class="input-group">
                     <label for="dataInicio">Início:</label>
-                    <input type="datetime-local" id="dataInicio" required>
-                </div>
+                    <input type="text" id="dataInicio" placeholder="Selecione data e hora..." required readonly>                </div>
                 
                 <div class="input-group">
                     <label for="dataFim">Fim (Opcional):</label>
-                    <input type="datetime-local" id="dataFim">
-                </div>
+                    <input type="text" id="dataFim" placeholder="Selecione data e hora..." readonly>                </div>
 
                 <div class="input-group">
                     <label for="participantes">Participantes (separados por vírgula):</label>

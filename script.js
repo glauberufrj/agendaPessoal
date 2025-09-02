@@ -15,6 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const formEdicao = document.getElementById('form-edicao');
     const fecharModal = document.getElementsByClassName('fechar-modal')[0];
 
+    const configCalendario = {
+        enableTime: true,        // Permite a seleção de hora
+        dateFormat: "Y-m-d H:i", // Formato que o banco de dados entende
+        time_24hr: true,         // Formato 24h
+        locale: "pt"             // Usa a tradução para português que importamos
+    };
+
+    // Aplica a configuração aos campos de data no formulário de ADIÇÃO
+    if (formCompromisso) {
+        flatpickr("#dataInicio", configCalendario);
+        flatpickr("#dataFim", configCalendario);
+    }
+    // Aplica a configuração aos campos de data no formulário de EDIÇÃO (modal)
+    if (modal) {
+        flatpickr("#edit-dataInicio", configCalendario);
+        flatpickr("#edit-dataFim", configCalendario);
+    }
+    // --- FIM DO BLOCO A SER ADICIONADO ---
+
     const init = async () => {
         // Na página de cadastro, não precisamos mais buscar todos os compromissos
         if (isPaginaVisualizacao) {
