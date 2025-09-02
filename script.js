@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         compromissosDoMes.forEach(comp => {
             const item = document.createElement('li');
             item.className = 'compromisso-item-view';
-            item.dataset.id = comp.id; // Adiciona o ID para as ações
+            item.dataset.id = comp.id;
             const dia = new Date(comp.dataInicio).getDate();
             
             let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fim = new Date(comp.dataFim);
                 dataFormatada += ` até ${fim.toLocaleTimeString('pt-BR', { timeStyle: 'short' })}`;
             }
-            const tagRecorrencia = comp.recorrencia && comp.recorrencia !== 'nenhuma' && !comp.isOcorrencia ? `<span class="recorrencia-tag">${comp.recorrencia}</span>` : '';
+            const tagRecorrencia = comp.recorrencia && comp.recorrencia !== 'nenhuma' ? `<span class="recorrencia-tag">${comp.recorrencia}</span>` : '';
             const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
             
             item.innerHTML = `<div class="compromisso-info">
@@ -121,23 +121,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- FUNÇÕES DE AÇÃO E EVENTOS (Agora compartilhadas e globais) ---
+    // --- FUNÇÕES DE AÇÃO E EVENTOS (COM A CORREÇÃO) ---
 
     const manipularAcoesCompromisso = async (e) => {
         const alvo = e.target;
-        // Seletor unificado que funciona em ambas as páginas
+        
+        // CORREÇÃO: Em vez de checar a classe do 'alvo', usamos 'closest' para encontrar o botão mais próximo.
+        // Isso funciona mesmo se o clique for no texto dentro do botão.
+        const btnDeletar = alvo.closest('.btn-deletar');
+        const btnEditar = alvo.closest('.btn-editar');
+
+        // Se não clicamos em nenhum botão de ação, não fazemos nada.
+        if (!btnDeletar && !btnEditar) {
+            return;
+        }
+
         const item = alvo.closest('.compromisso-item-view, .compromisso-item');
         if (!item) return;
         const id = Number(item.dataset.id);
 
-        if (alvo.classList.contains('btn-deletar')) {
+        if (btnDeletar) {
             if (confirm('Tem certeza que deseja deletar este compromisso?')) {
                 await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                await init(); // Recarrega os dados em ambas as páginas
+                await init();
             }
         }
 
-        if (alvo.classList.contains('btn-editar')) {
+        if (btnEditar) {
             const compParaEditar = todosOsCompromissos.find(comp => comp.id === id);
             if (compParaEditar) {
                 document.getElementById('edit-id').value = compParaEditar.id;
@@ -174,11 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         await init();
     };
 
-    // Adiciona o listener para a lista de compromissos (funciona em ambas as páginas)
     if (listaCompromissos) {
         listaCompromissos.addEventListener('click', manipularAcoesCompromisso);
     }
-    // Adiciona os listeners para o modal de edição (funciona em ambas as páginas)
     if (modal) {
         formEdicao.addEventListener('submit', salvarEdicao);
         fecharModal.onclick = () => { modal.style.display = "none"; }
@@ -188,26 +196,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA ESPECÍFICA DE CADA PÁGINA ---
 
     if (isPaginaVisualizacao) {
-        // Lógica de navegação dos meses
         const btnMesAnterior = document.getElementById('btn-mes-anterior');
         const btnMesProximo = document.getElementById('btn-mes-proximo');
-
         btnMesAnterior.addEventListener('click', () => {
             dataExibida.setMonth(dataExibida.getMonth() - 1);
             renderizarAgenda();
         });
-
         btnMesProximo.addEventListener('click', () => {
             dataExibida.setMonth(dataExibida.getMonth() + 1);
             renderizarAgenda();
         });
     } else {
-        // Lógica do formulário de adicionar compromisso
         const adicionarCompromisso = async (e) => {
             e.preventDefault();
             const participantesInput = document.getElementById('participantes').value;
             const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
-
             const novoCompromisso = {
                 titulo: document.getElementById('titulo').value,
                 dataInicio: document.getElementById('dataInicio').value,
@@ -216,13 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 descricao: document.getElementById('descricao').value,
                 participantes: participantes
             };
-
             await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novoCompromisso)
             });
-
             formCompromisso.reset();
             await init();
         };
@@ -233,6 +234,5 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAtualizar.addEventListener('click', init);
     }
     
-    // Inicia a aplicação
     init();
 });
