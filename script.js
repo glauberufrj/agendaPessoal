@@ -1,41 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = '/api/compromissos';
-
     let todosOsCompromissos = []; 
     let dataExibida = new Date(); 
 
     const listaCompromissos = document.getElementById('lista-compromissos');
-    const btnAtualizar = document.getElementById('btn-atualizar');
-    
     const formCompromisso = document.getElementById('form-compromisso');
     const isPaginaVisualizacao = !formCompromisso;
-
+    
     const modal = document.getElementById('modal-edicao');
     const formEdicao = document.getElementById('form-edicao');
     const fecharModal = document.getElementsByClassName('fechar-modal')[0];
 
-    const configCalendario = {
-        enableTime: true,        // Permite a seleção de hora
-        dateFormat: "Y-m-d H:i", // Formato que o banco de dados entende
-        time_24hr: true,         // Formato 24h
-        locale: "pt"             // Usa a tradução para português que importamos
-    };
-
-    // Aplica a configuração aos campos de data no formulário de ADIÇÃO
-    if (formCompromisso) {
-        flatpickr("#dataInicio", configCalendario);
-        flatpickr("#dataFim", configCalendario);
-    }
-    // Aplica a configuração aos campos de data no formulário de EDIÇÃO (modal)
-    if (modal) {
-        flatpickr("#edit-dataInicio", configCalendario);
-        flatpickr("#edit-dataFim", configCalendario);
-    }
-    // --- FIM DO BLOCO A SER ADICIONADO ---
-
     const init = async () => {
-        // Na página de cadastro, não precisamos mais buscar todos os compromissos
         if (isPaginaVisualizacao) {
             todosOsCompromissos = await getCompromissosDaAPI();
         }
@@ -56,35 +33,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderizarAgenda = () => {
         if (isPaginaVisualizacao) {
             if (!listaCompromissos) return;
-            listaCompromissos.innerHTML = '';
             renderizarAgendaPaginada();
         }
-        // Na página de cadastro, esta função não faz mais nada
+    };
+
+    const renderizarProximoEvento = () => {
+        const proximoEventoContainer = document.getElementById('proximo-evento-container');
+        if (!proximoEventoContainer) return;
+
+        const agora = new Date();
+        const eventosFuturos = todosOsCompromissos
+            .filter(comp => new Date(comp.dataInicio) > agora)
+            .sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio));
+
+        if (eventosFuturos.length > 0) {
+            const proximoEvento = eventosFuturos[0];
+            const data = new Date(proximoEvento.dataInicio);
+            const dataFormatada = data.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
+            
+            proximoEventoContainer.innerHTML = `
+                <h3>Próximo Evento</h3>
+                <p><strong>${proximoEvento.titulo}</strong></p>
+                <small>${dataFormatada}</small>
+            `;
+        } else {
+            proximoEventoContainer.innerHTML = `<h3>Nenhum evento futuro agendado.</h3>`;
+        }
     };
 
     const renderizarAgendaPaginada = () => {
+        renderizarProximoEvento();
+        
         const mesAnoTitulo = document.getElementById('mes-ano-exibido');
         mesAnoTitulo.textContent = dataExibida.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
         const compromissosDoMes = todosOsCompromissos.filter(comp => {
             const dataComp = new Date(comp.dataInicio);
             return dataComp.getMonth() === dataExibida.getMonth() && dataComp.getFullYear() === dataExibida.getFullYear();
         }).sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio));
+
+        listaCompromissos.innerHTML = '';
         if (compromissosDoMes.length === 0) {
             listaCompromissos.innerHTML = '<li>Nenhum compromisso para este mês.</li>';
             return;
         }
+
         compromissosDoMes.forEach(comp => {
             const item = document.createElement('li');
             item.className = 'compromisso-item-view';
             item.dataset.id = comp.id;
-            const dia = new Date(comp.dataInicio).getDate();
+            const data = new Date(comp.dataInicio);
+            const diaNumero = data.getDate();
+            const diaSemana = data.toLocaleString('pt-BR', { weekday: 'long' });
+
             let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
             const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
+
             item.innerHTML = `
-                <div class="compromisso-dia">${dia}</div>
+                <div class="compromisso-dia">
+                    <span class="dia-numero">${diaNumero}</span>
+                    <span class="dia-semana">${diaSemana}</span>
+                </div>
                 <div class="compromisso-detalhes">
                     <strong>${comp.titulo}</strong>
-                    <small>${new Date(comp.dataInicio).toLocaleTimeString('pt-BR', {timeStyle: 'short'})}</small>
+                    <small>${data.toLocaleTimeString('pt-BR', {timeStyle: 'short'})}</small>
                     ${participantesHTML}
                 </div>
                 ${acoesHTML}
@@ -92,8 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
             listaCompromissos.appendChild(item);
         });
     };
-
-    // --- FUNÇÕES DE AÇÃO E EVENTOS (Agora só se aplicam à página de visualização) ---
 
     if (isPaginaVisualizacao) {
         const manipularAcoesCompromisso = async (e) => {
@@ -106,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const id = Number(item.dataset.id);
 
             if (btnDeletar) {
-                if (confirm('Tem certeza que deseja deletar este compromisso?')) {
+                if (confirm('Tem certeza?')) {
                     await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
                     await init();
                 }
@@ -167,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dataExibida.setMonth(dataExibida.getMonth() + 1);
             renderizarAgenda();
         });
-    } else { // Lógica da página de Adicionar (index.html)
+    } else { 
         const adicionarCompromisso = async (e) => {
             e.preventDefault();
             const participantesInput = document.getElementById('participantes').value;
@@ -185,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novoCompromisso)
             });
-
             if (response.ok) {
                 alert('Compromisso adicionado com sucesso!');
                 formCompromisso.reset();
@@ -195,9 +203,26 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         formCompromisso.addEventListener('submit', adicionarCompromisso);
     }
+    
+    // Inicialização dos calendários Flatpickr
+    const configCalendario = {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        locale: "pt"
+    };
 
-    if (btnAtualizar) {
-        btnAtualizar.addEventListener('click', init);
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        configCalendario.theme = "dark";
+    }
+
+    if (formCompromisso) {
+        flatpickr("#dataInicio", configCalendario);
+        flatpickr("#dataFim", configCalendario);
+    }
+    if (modal) {
+        flatpickr("#edit-dataInicio", configCalendario);
+        flatpickr("#edit-dataFim", configCalendario);
     }
     
     init();

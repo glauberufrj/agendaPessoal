@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualização da Agenda</title>
-    <link rel="stylesheet" href="style.css">
     
+    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 </head>
@@ -15,8 +17,11 @@
     <div class="container">
         <div class="header">
             <h1>Agenda de Compromissos</h1>
-            <a href="index.html" class="btn-link">Gerenciar Compromissos</a>
+            <a href="index.html" class="btn-link">Adicionar Compromisso</a>
         </div>
+
+        <div id="proximo-evento-container">
+            </div>
 
         <div class="navegacao-mes">
             <button id="btn-mes-anterior">&lt; Anterior</button>
@@ -25,7 +30,6 @@
         </div>
         
         <div class="agenda-container-view">
-            <button id="btn-atualizar">Recarregar Dados</button> 
             <ul id="lista-compromissos">
                 </ul>
         </div>
@@ -43,11 +47,11 @@
                 </div>
                 <div class="input-group">
                     <label for="edit-dataInicio">Início:</label>
-                    <input type="datetime-local" id="edit-dataInicio" required>
+                    <input type="text" id="edit-dataInicio" placeholder="Selecione data e hora..." required readonly>
                 </div>
                 <div class="input-group">
                     <label for="edit-dataFim">Fim (Opcional):</label>
-                    <input type="datetime-local" id="edit-dataFim">
+                    <input type="text" id="edit-dataFim" placeholder="Selecione data e hora..." readonly>
                 </div>
                 <div class="input-group">
                     <label for="edit-participantes">Participantes (separados por vírgula):</label>
@@ -69,5 +73,6 @@
     </div>
 
     <script src="script.js"></script>
+
 </body>
 </html>
