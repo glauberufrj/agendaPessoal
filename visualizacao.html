@@ -26,15 +26,39 @@
                 </ul>
         </div>
     </div>
+
     <div id="modal-edicao" class="modal">
         <div class="modal-content">
             <span class="fechar-modal">&times;</span>
             <h2>Editar Compromisso</h2>
             <form id="form-edicao">
                 <input type="hidden" id="edit-id">
-                <input type="text" id="edit-titulo" required>
-                <input type="text" id="edit-participantes">
-                <textarea id="edit-descricao"></textarea>
+                <div class="input-group">
+                    <label for="edit-titulo">Título:</label>
+                    <input type="text" id="edit-titulo" required>
+                </div>
+                <div class="input-group">
+                    <label for="edit-dataInicio">Início:</label>
+                    <input type="datetime-local" id="edit-dataInicio" required>
+                </div>
+                <div class="input-group">
+                    <label for="edit-dataFim">Fim (Opcional):</label>
+                    <input type="datetime-local" id="edit-dataFim">
+                </div>
+                <div class="input-group">
+                    <label for="edit-participantes">Participantes (separados por vírgula):</label>
+                    <input type="text" id="edit-participantes">
+                </div>
+                <div class="input-group">
+                    <label for="edit-recorrencia">Recorrência:</label>
+                    <select id="edit-recorrencia">
+                        <option value="nenhuma">Não se repete</option>
+                        <option value="diaria">Diariamente</option>
+                        <option value="semanal">Semanalmente</option>
+                        <option value="mensal">Mensalmente</option>
+                    </select>
+                </div>
+                <textarea id="edit-descricao" placeholder="Descrição (opcional)"></textarea>
                 <button type="submit">Salvar Alterações</button>
             </form>
         </div>

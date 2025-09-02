@@ -1,3 +1,4 @@
+// Cole este código completo no seu script.js
 document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = '/api/compromissos';
@@ -122,9 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (btnEditar) {
-            // A CORREÇÃO FINAL ESTÁ AQUI: Number(comp.id)
             const compParaEditar = todosOsCompromissos.find(comp => Number(comp.id) === id);
-
             if (compParaEditar) {
                 document.getElementById('edit-id').value = compParaEditar.id;
                 document.getElementById('edit-titulo').value = compParaEditar.titulo;
@@ -188,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const novoCompromisso = {
                 titulo: document.getElementById('titulo').value,
                 dataInicio: document.getElementById('dataInicio').value,
-                dataFim: document.getElementById('dataFim').value || null,
+                dataFim: document.getElementById('dataFim').value || null, // CORRIGIDO: Era 'edit-dataFim'
                 recorrencia: document.getElementById('recorrencia').value,
                 descricao: document.getElementById('descricao').value,
                 participantes: participantes
