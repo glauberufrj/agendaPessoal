@@ -77,25 +77,63 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        compromissosDoMes.forEach(comp => {
+        // --- NOVA LÓGICA DE AGRUPAMENTO ---
+        const gruposDeEventos = [];
+        compromissosDoMes.forEach(evento => {
+            const ultimoGrupo = gruposDeEventos[gruposDeEventos.length - 1];
+            const dataEvento = new Date(evento.dataInicio);
+            
+            // Verifica se pode agrupar com o evento anterior
+            if (ultimoGrupo && 
+                ultimoGrupo.titulo === evento.titulo && 
+                (new Date(ultimoGrupo.dataFim).setDate(new Date(ultimoGrupo.dataFim).getDate() + 1) === dataEvento.setHours(0,0,0,0))) 
+            {
+                // Se sim, apenas atualiza a data final do grupo
+                ultimoGrupo.dataFim = dataEvento;
+            } else {
+                // Se não, cria um novo grupo
+                gruposDeEventos.push({
+                    id: evento.id, // Usa o ID do primeiro evento do grupo
+                    titulo: evento.titulo,
+                    dataInicio: dataEvento,
+                    dataFim: dataEvento, // Inicialmente, o fim é igual ao início
+                    hora: new Date(evento.dataInicio).toLocaleTimeString('pt-BR', {timeStyle: 'short'}),
+                    participantes: evento.participantes
+                });
+            }
+        });
+
+        // --- RENDERIZAÇÃO BASEADA NOS GRUPOS ---
+        gruposDeEventos.forEach(grupo => {
             const item = document.createElement('li');
             item.className = 'compromisso-item-view';
-            item.dataset.id = comp.id;
-            const data = new Date(comp.dataInicio);
-            const diaNumero = data.getDate();
-            const diaSemana = data.toLocaleString('pt-BR', { weekday: 'long' });
+            item.dataset.id = grupo.id;
 
-            let participantesHTML = comp.participantes && comp.participantes.length > 0 ? `<div class="participantes-container">${comp.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
+            // Formatação do dia e dia da semana
+            const diaInicio = grupo.dataInicio.getDate();
+            const diaFim = grupo.dataFim.getDate();
+            const semanaInicio = grupo.dataInicio.toLocaleString('pt-BR', { weekday: 'long' });
+            const semanaFim = grupo.dataFim.toLocaleString('pt-BR', { weekday: 'long' });
+            
+            let diaNumeroHTML = diaInicio;
+            let diaSemanaHTML = semanaInicio;
+
+            if (diaInicio !== diaFim) {
+                diaNumeroHTML = `${diaInicio} - ${diaFim}`;
+                diaSemanaHTML = `${semanaInicio} a ${semanaFim}`;
+            }
+
+            let participantesHTML = grupo.participantes && grupo.participantes.length > 0 ? `<div class="participantes-container">${grupo.participantes.map(p => `<span class="participante-tag">${p}</span>`).join('')}</div>` : '';
             const acoesHTML = `<div class="compromisso-acoes"><button class="btn-editar">Editar</button><button class="btn-deletar">Deletar</button></div>`;
 
             item.innerHTML = `
                 <div class="compromisso-dia">
-                    <span class="dia-numero">${diaNumero}</span>
-                    <span class="dia-semana">${diaSemana}</span>
+                    <span class="dia-numero">${diaNumeroHTML}</span>
+                    <span class="dia-semana">${diaSemanaHTML}</span>
                 </div>
                 <div class="compromisso-detalhes">
-                    <strong>${comp.titulo}</strong>
-                    <small>${data.toLocaleTimeString('pt-BR', {timeStyle: 'short'})}</small>
+                    <strong>${grupo.titulo}</strong>
+                    <small>${grupo.hora}</small>
                     ${participantesHTML}
                 </div>
                 ${acoesHTML}

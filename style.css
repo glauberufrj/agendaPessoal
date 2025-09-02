@@ -91,14 +91,15 @@ input[type="text"]:focus, textarea:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-/* --- NOVO: Estilo do Componente Próximo Evento --- */
+/* --- Destaque Visual para o Próximo Evento --- */
 .proximo-evento-container {
     background-color: #F4F7F9;
     border: 1px solid #e0e6ed;
     border-left: 5px solid #4A90E2;
     border-radius: 8px;
     padding: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 40px; /* AUMENTADO O ESPAÇAMENTO */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* ADICIONADA SOMBRA SUTIL */
 }
 
 .proximo-evento-container h3 {
@@ -214,6 +215,8 @@ input[type="text"]:focus, textarea:focus, select:focus {
         font-size: 1.3em;
         margin-bottom: 10px;
     }
+
+    .proximo-evento-container { padding: 15px; }
 
     .compromisso-item-view {
         flex-direction: column;
