@@ -7,6 +7,8 @@
     
     <link rel="stylesheet" href="style.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -20,13 +22,16 @@
             <a href="index.html" class="btn-link">Adicionar Compromisso</a>
         </div>
 
-        <div id="proximo-evento-container">
+        <div class="painel-controle">
+            <div id="proximo-evento-container">
+                </div>
+            <div class="navegacao-mes">
+                <h2 id="mes-ano-exibido">Carregando...</h2>
+                <div class="botoes-nav">
+                    <button id="btn-mes-anterior" title="Mês Anterior"><i class="fas fa-chevron-left"></i></button>
+                    <button id="btn-mes-proximo" title="Próximo Mês"><i class="fas fa-chevron-right"></i></button>
+                </div>
             </div>
-
-        <div class="navegacao-mes">
-            <button id="btn-mes-anterior">&lt; Anterior</button>
-            <h2 id="mes-ano-exibido">Carregando...</h2>
-            <button id="btn-mes-proximo">Próximo &gt;</button>
         </div>
         
         <div class="agenda-container-view">

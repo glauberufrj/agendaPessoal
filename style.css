@@ -91,15 +91,20 @@ input[type="text"]:focus, textarea:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-/* --- Destaque Visual para o Próximo Evento --- */
-.proximo-evento-container {
+/* --- NOVO: Estilo do Painel de Controle --- */
+.painel-controle {
     background-color: #F4F7F9;
-    border: 1px solid #e0e6ed;
-    border-left: 5px solid #4A90E2;
     border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 40px; /* AUMENTADO O ESPAÇAMENTO */
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* ADICIONADA SOMBRA SUTIL */
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid #e0e6ed;
+}
+
+/* --- Estilo Ajustado do Próximo Evento --- */
+.proximo-evento-container {
+    border-bottom: 1px solid #dce3ec;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .proximo-evento-container h3 {
@@ -108,23 +113,17 @@ input[type="text"]:focus, textarea:focus, select:focus {
     font-size: 1.2em;
 }
 
-.proximo-evento-container p {
-    margin: 4px 0;
-    font-size: 1.1em;
-}
+.proximo-evento-container p { margin: 4px 0; font-size: 1.1em; }
+.proximo-evento-container small { color: #7f8c8d; }
 
-.proximo-evento-container small {
-    color: #7f8c8d;
-}
-
-/* --- Estilos da Agenda --- */
+/* --- Estilo Redesenhado da Navegação --- */
 .navegacao-mes {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e0e6ed;
+    padding: 0;
+    margin: 0;
+    border: none;
 }
 
 #mes-ano-exibido {
@@ -132,6 +131,16 @@ input[type="text"]:focus, textarea:focus, select:focus {
     text-transform: capitalize;
 }
 
+.botoes-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.botoes-nav button {
+    padding: 8px 12px; /* Botões de ícone menores */
+}
+
+/* --- Estilos da Lista da Agenda --- */
 .compromisso-item-view {
     display: flex;
     align-items: flex-start;
@@ -204,19 +213,16 @@ input[type="text"]:focus, textarea:focus, select:focus {
 
     .navegacao-mes {
         flex-wrap: wrap;
-        gap: 10px;
-        justify-content: space-between;
     }
 
     #mes-ano-exibido {
-        width: 100%;
-        text-align: center;
-        order: -1;
         font-size: 1.3em;
-        margin-bottom: 10px;
+        margin-bottom: 0;
     }
-
-    .proximo-evento-container { padding: 15px; }
+    
+    .painel-controle {
+        padding: 15px;
+    }
 
     .compromisso-item-view {
         flex-direction: column;
