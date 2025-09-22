@@ -44,7 +44,7 @@ h2 { font-size: 1.5em; }
 button, .btn-link {
     background-color: #4A90E2;
     color: white;
-    padding: 10px 18px;
+    padding: 5px 8px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -259,10 +259,36 @@ input[type="text"]:focus, textarea:focus, select:focus {
         padding: 15px;
     }
 
-    .dia-da-semana-container h3 { 
-        flex-direction: column; 
-        align-items: flex-start;
-        gap: 5px; 
+    .dia-da-semana-container h3 {
+        background-color: #E9F2FC; 
+        color: #357ABD;
+        padding: 12px 15px;
+        font-size: 1.1em;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #DEE2E6;
+    }
+    
+    .btn-add-dia {
+        background: none;
+        border: none;
+        color: #4A90E2;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        line-height: 1;
+        font-size: 14px;
+        transition: background-color 0.2s, color 0.2s, transform 0.2s;
+    }
+
+    .btn-add-dia:hover {
+        background-color: rgba(74, 144, 226, 0.15);
+        color: #357ABD;
+        transform: scale(1.1);
     }
     
     .modal-content {

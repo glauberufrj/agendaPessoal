@@ -2,19 +2,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = '/api/compromissos';
 
+    // --- VARIÁVEIS DE ESTADO ---
     let todosOsCompromissos = []; 
     let dataExibida = new Date(); 
     dataExibida.setDate(dataExibida.getDate() - dataExibida.getDay());
     dataExibida.setHours(0, 0, 0, 0);
 
+    // --- SELETORES DE ELEMENTOS ---
     const listaCompromissos = document.getElementById('lista-compromissos');
     const formCompromisso = document.getElementById('form-compromisso');
     const isPaginaVisualizacao = !formCompromisso;
     
     const modal = document.getElementById('modal-edicao');
+    const modalTitulo = document.querySelector('#modal-edicao h2 span');
+    const modalSubmitButton = document.querySelector('#form-edicao button[type="submit"]');
     const formEdicao = document.getElementById('form-edicao');
     const fecharModal = document.getElementsByClassName('fechar-modal')[0];
 
+    // --- INICIALIZAÇÃO ---
     const init = async () => {
         if (isPaginaVisualizacao) {
             todosOsCompromissos = await getCompromissosDaAPI();
@@ -34,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // --- LÓGICA DE RENDERIZAÇÃO ---
     const renderizarAgenda = () => {
         if (isPaginaVisualizacao) {
             if (!listaCompromissos) return;
@@ -79,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 7; i++) {
             const diaAtual = new Date(semanaInicio);
             diaAtual.setDate(diaAtual.getDate() + i);
-            const eventosDoDia = eventosDaSemana.filter(e => new Date(e.dataInicio).getDay() === i);
+            const eventosDoDia = eventosDaSemana.filter(e => new Date(e.dataInicio).toDateString() === diaAtual.toDateString());
             
             const diaContainer = document.createElement('div');
             diaContainer.className = 'dia-da-semana-container';
@@ -107,8 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 eventosHTML = '<li class="sem-compromissos">Nenhum compromisso</li>';
             }
 
+            const diaAtualISO = diaAtual.toISOString().slice(0, 10);
+            const addButtonHTML = `<button class="btn-add-dia" data-date="${diaAtualISO}" title="Adicionar evento neste dia"><i class="fas fa-plus"></i></button>`;
+
             diaContainer.innerHTML = `
-                <h3>${diasDaSemanaNomes[i]} <span class="data-dia">${diaAtual.getDate()}/${diaAtual.getMonth() + 1}</span></h3>
+                <h3>
+                    <div class="dia-header-content">${diasDaSemanaNomes[i]} <span class="data-dia">${diaAtual.getDate()}/${diaAtual.getMonth() + 1}</span></div>
+                    ${addButtonHTML}
+                </h3>
                 <ul class="lista-dia">${eventosHTML}</ul>
             `;
             listaCompromissos.appendChild(diaContainer);
@@ -123,11 +135,21 @@ document.addEventListener('DOMContentLoaded', () => {
         todosOsCompromissos.forEach(comp => {
             const dataInicioOriginal = new Date(comp.dataInicio);
             
-            if (comp.recorrencia === 'nenhuma' && dataInicioOriginal >= inicioDaSemana && dataInicioOriginal < fimDaSemana) {
-                eventos.push({ ...comp });
-            }
-            
-            if (comp.recorrencia === 'semanal') {
+            if (comp.recorrencia === 'nenhuma' || !comp.recorrencia) {
+                const dataFimOriginal = comp.dataFim ? new Date(comp.dataFim) : dataInicioOriginal;
+                let diaCorrente = new Date(dataInicioOriginal);
+                diaCorrente.setHours(0,0,0,0);
+
+                while (diaCorrente <= dataFimOriginal) {
+                    if (diaCorrente >= inicioDaSemana && diaCorrente < fimDaSemana) {
+                        const dataOcorrencia = new Date(diaCorrente);
+                        dataOcorrencia.setHours(dataInicioOriginal.getHours(), dataInicioOriginal.getMinutes());
+                        eventos.push({ ...comp, dataInicio: dataOcorrencia.toISOString() });
+                    }
+                    diaCorrente.setDate(diaCorrente.getDate() + 1);
+                }
+
+            } else if (comp.recorrencia === 'semanal') {
                 const dataFimRecorrencia = comp.data_fim_recorrencia ? new Date(comp.data_fim_recorrencia) : null;
                 const diaDaSemanaDoEvento = parseInt(comp.dia_da_semana);
                 
@@ -152,26 +174,34 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (isPaginaVisualizacao) {
-        const manipularAcoesCompromisso = async (e) => {
+        const manipularCliquesNaAgenda = async (e) => {
             const alvo = e.target;
             const btnDeletar = alvo.closest('.btn-deletar');
             const btnEditar = alvo.closest('.btn-editar');
-            if (!btnDeletar && !btnEditar) return;
-            const item = alvo.closest('.compromisso-item-semanal');
-            if (!item) return;
-            const id = Number(item.dataset.id);
+            const btnQuickAdd = alvo.closest('.btn-add-dia');
 
             if (btnDeletar) {
-                if (confirm('Deletar um evento recorrente irá remover todas as suas futuras ocorrências. Deseja continuar?')) {
+                const item = alvo.closest('.compromisso-item-semanal');
+                if (!item) return;
+                const id = Number(item.dataset.id);
+                if (confirm('Deletar um evento recorrente irá remover sua regra de repetição. Deseja continuar?')) {
                     await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
                     await init();
                 }
             }
+
             if (btnEditar) {
+                const item = alvo.closest('.compromisso-item-semanal');
+                if (!item) return;
+                const id = Number(item.dataset.id);
                 const compParaEditar = todosOsCompromissos.find(comp => comp.id === id);
                 if (compParaEditar) {
                     const recorrenciaSelect = document.getElementById('edit-recorrencia');
                     const opcoesRecorrencia = document.getElementById('edit-opcoes-recorrencia');
+                    
+                    modalTitulo.textContent = "Editar";
+                    modalSubmitButton.textContent = "Salvar Alterações";
+                    formEdicao.dataset.mode = 'edit';
                     
                     document.getElementById('edit-id').value = compParaEditar.id;
                     document.getElementById('edit-titulo').value = compParaEditar.titulo;
@@ -180,28 +210,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     recorrenciaSelect.value = compParaEditar.recorrencia || 'nenhuma';
                     document.getElementById('edit-descricao').value = compParaEditar.descricao;
                     document.getElementById('edit-participantes').value = compParaEditar.participantes ? compParaEditar.participantes.join(', ') : '';
-                    document.getElementById('edit-dia_da_semana').value = compParaEditar.dia_da_semana || '1';
+                    document.getElementById('edit-dia_da_semana').value = compParaEditar.dia_da_semana !== null ? compParaEditar.dia_da_semana : '1';
                     document.getElementById('edit-data_fim_recorrencia').value = compParaEditar.data_fim_recorrencia ? compParaEditar.data_fim_recorrencia.slice(0, 10) : '';
                     
                     toggleRecorrencia(recorrenciaSelect, opcoesRecorrencia);
                     modal.style.display = "block";
                 }
             }
+
+            if (btnQuickAdd) {
+                modalTitulo.textContent = "Adicionar";
+                modalSubmitButton.textContent = "Adicionar Compromisso";
+                formEdicao.dataset.mode = 'add';
+                formEdicao.reset();
+                document.getElementById('edit-id').value = '';
+                
+                const dataSelecionada = btnQuickAdd.dataset.date;
+                const dataInicioPreenchida = `${dataSelecionada} 09:00`;
+                flatpickr("#edit-dataInicio").setDate(dataInicioPreenchida, true);
+                
+                toggleRecorrencia(document.getElementById('edit-recorrencia'), document.getElementById('edit-opcoes-recorrencia'));
+                modal.style.display = "block";
+            }
         };
 
-        const salvarEdicao = async (e) => {
+        const salvarFormularioModal = async (e) => {
             e.preventDefault();
+            const mode = formEdicao.dataset.mode;
             const id = Number(document.getElementById('edit-id').value);
             const recorrencia = document.getElementById('edit-recorrencia').value;
             const participantesInput = document.getElementById('edit-participantes').value;
             const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
-
-            // --- CORREÇÃO DE FUSO HORÁRIO APLICADA AQUI ---
             const dataInicioValue = document.getElementById('edit-dataInicio').value;
             const dataFimValue = document.getElementById('edit-dataFim').value;
             const dataFimRecorrenciaValue = document.getElementById('edit-data_fim_recorrencia').value;
 
-            const compromissoEditado = {
+            const payload = {
                 titulo: document.getElementById('edit-titulo').value,
                 dataInicio: dataInicioValue ? new Date(dataInicioValue).toISOString() : null,
                 dataFim: dataFimValue ? new Date(dataFimValue).toISOString() : null,
@@ -211,24 +255,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 dia_da_semana: recorrencia === 'semanal' ? document.getElementById('edit-dia_da_semana').value : null,
                 data_fim_recorrencia: recorrencia === 'semanal' && dataFimRecorrenciaValue ? new Date(dataFimRecorrenciaValue).toISOString() : null
             };
+
+            if (mode === 'edit') {
+                await fetch(`${API_URL}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            } else {
+                await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            }
             
-            await fetch(`${API_URL}/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(compromissoEditado)
-            });
             modal.style.display = "none";
             await init();
         };
 
         if (listaCompromissos) {
-            listaCompromissos.addEventListener('click', manipularAcoesCompromisso);
+            listaCompromissos.addEventListener('click', manipularCliquesNaAgenda);
         }
         if (modal) {
             const recorrenciaSelect = document.getElementById('edit-recorrencia');
             const opcoesRecorrencia = document.getElementById('edit-opcoes-recorrencia');
             recorrenciaSelect.addEventListener('change', () => toggleRecorrencia(recorrenciaSelect, opcoesRecorrencia));
-            formEdicao.addEventListener('submit', salvarEdicao);
+            formEdicao.addEventListener('submit', salvarFormularioModal);
             fecharModal.onclick = () => { modal.style.display = "none"; }
             window.onclick = (event) => { if (event.target == modal) { modal.style.display = "none"; }}
         }
@@ -243,18 +288,19 @@ document.addEventListener('DOMContentLoaded', () => {
             dataExibida.setDate(dataExibida.getDate() + 7);
             renderizarAgenda();
         });
+
     } else { 
         const recorrenciaSelect = document.getElementById('recorrencia');
         const opcoesRecorrencia = document.getElementById('opcoes-recorrencia');
-        recorrenciaSelect.addEventListener('change', () => toggleRecorrencia(recorrenciaSelect, opcoesRecorrencia));
+        if (recorrenciaSelect) {
+            recorrenciaSelect.addEventListener('change', () => toggleRecorrencia(recorrenciaSelect, opcoesRecorrencia));
+        }
         
         const adicionarCompromisso = async (e) => {
             e.preventDefault();
             const recorrencia = document.getElementById('recorrencia').value;
             const participantesInput = document.getElementById('participantes').value;
             const participantes = participantesInput ? participantesInput.split(',').map(p => p.trim()).filter(p => p) : [];
-
-            // --- CORREÇÃO DE FUSO HORÁRIO APLICADA AQUI ---
             const dataInicioValue = document.getElementById('dataInicio').value;
             const dataFimValue = document.getElementById('dataFim').value;
             const dataFimRecorrenciaValue = document.getElementById('data_fim_recorrencia').value;
@@ -283,7 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Ocorreu um erro ao adicionar o compromisso.');
             }
         };
-        formCompromisso.addEventListener('submit', adicionarCompromisso);
+        if(formCompromisso) {
+            formCompromisso.addEventListener('submit', adicionarCompromisso);
+        }
     }
     
     // Inicialização dos calendários Flatpickr
