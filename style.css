@@ -228,6 +228,12 @@ input[type="text"]:focus, textarea:focus, select:focus {
 .modal-content { background-color: #fefefe; margin: 15% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 550px; border-radius: 8px; position: relative; }
 .fechar-modal { color: #aaa; position: absolute; top: 10px; right: 25px; font-size: 28px; font-weight: bold; cursor: pointer; }
 
+.btn-add-dia:hover {
+    background-color: rgba(74, 144, 226, 0.15);
+    color: #357ABD;
+    transform: scale(1.1);
+}
+
 /* --- RESPONSIVIDADE --- */
 @media (max-width: 992px) {
     #lista-compromissos {
@@ -257,38 +263,6 @@ input[type="text"]:focus, textarea:focus, select:focus {
     
     .painel-controle {
         padding: 15px;
-    }
-
-    .dia-da-semana-container h3 {
-        background-color: #E9F2FC; 
-        color: #357ABD;
-        padding: 12px 15px;
-        font-size: 1.1em;
-        font-weight: 600;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #DEE2E6;
-    }
-    
-    .btn-add-dia {
-        background: none;
-        border: none;
-        color: #4A90E2;
-        cursor: pointer;
-        padding: 4px;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        line-height: 1;
-        font-size: 14px;
-        transition: background-color 0.2s, color 0.2s, transform 0.2s;
-    }
-
-    .btn-add-dia:hover {
-        background-color: rgba(74, 144, 226, 0.15);
-        color: #357ABD;
-        transform: scale(1.1);
     }
     
     .modal-content {
