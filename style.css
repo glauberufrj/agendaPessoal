@@ -17,7 +17,6 @@ body {
 }
 
 .container {
-    max-width: 800px;
     margin: auto;
     background: #FFFFFF;
     padding: 30px;
@@ -82,6 +81,8 @@ input[type="text"], textarea, select {
     border: 1px solid #ccc;
     border-radius: 6px;
     box-sizing: border-box;
+    font-family: inherit;
+    font-size: 1em;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -91,39 +92,38 @@ input[type="text"]:focus, textarea:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-/* --- NOVO: Estilo do Painel de Controle --- */
+/* --- Painel de Controle --- */
 .painel-controle {
-    background-color: #F4F7F9;
+    background-color: #2D546C7D;
     border-radius: 8px;
     padding: 25px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     border: 1px solid #e0e6ed;
 }
 
-/* --- Estilo Ajustado do Próximo Evento --- */
-.proximo-evento-container {
+.painel-controle h3 {
+    color: #0D1231;
     border-bottom: 1px solid #dce3ec;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    padding-bottom: 10px;
 }
 
-.proximo-evento-container h3 {
-    margin: 0 0 15px 0;
-    color: #2C3E50;
-    font-size: 1.2em;
+#proximo-evento-container {
+    padding-bottom: 10px;
 }
 
-.proximo-evento-container p { margin: 4px 0; font-size: 1.1em; }
-.proximo-evento-container small { color: #7f8c8d; }
+#proximo-evento-container p { margin: 8px 0; font-size: 1.1em; }
 
-/* --- Estilo Redesenhado da Navegação --- */
 .navegacao-mes {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0;
-    margin: 0;
+    margin-bottom: 10px;
     border: none;
+}
+
+.navegacao-mes h2 {
+    color: #0D1231;
 }
 
 #mes-ano-exibido {
@@ -131,65 +131,95 @@ input[type="text"]:focus, textarea:focus, select:focus {
     text-transform: capitalize;
 }
 
-.botoes-nav {
-    display: flex;
-    gap: 10px;
+.botoes-nav { display: flex; gap: 10px; }
+.botoes-nav button { 
+    padding: 8px 12px; 
+    background-color: #2D546C
 }
 
-.botoes-nav button {
-    padding: 8px 12px; /* Botões de ícone menores */
+/* --- Layout de Grade para a Agenda Semanal --- */
+#lista-compromissos {
+    display: grid;
+    /* Cria 7 colunas de tamanho igual */
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px; /* Espaço entre as colunas */
+    list-style-type: none;
+    padding: 0;
 }
 
-/* --- Estilos da Lista da Agenda --- */
-.compromisso-item-view {
-    display: flex;
-    align-items: flex-start;
-    padding: 18px 5px;
-    border-bottom: 1px solid #ecf0f1;
-    transition: background-color 0.2s;
-}
-
-.compromisso-dia {
+.dia-da-semana-container {
+    margin-bottom: 0; 
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
+}
+
+.dia-da-semana-container h3 {
+    background-color: #2D546C;
+    padding: 12px 15px;
+    font-size: 1em;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    margin-right: 20px;
-    min-width: 60px;
-    color: #2C3E50;
+    border-bottom: 1px solid #e0e6ed;
+    height: 3em;
+    color: #FFF;
 }
 
-.dia-numero {
-    font-size: 1.8em;
-    font-weight: 500;
-    line-height: 1;
+.data-dia {
+    color: #ffffff;
+    font-weight: 400;
+    font-size: 0.9em;
 }
 
-.dia-semana {
-    font-size: 0.8em;
-    color: #7f8c8d;
-    text-transform: capitalize;
-}
-
-.compromisso-detalhes {
+.lista-dia {
+    list-style-type: none;
+    padding: 10px;
+    margin: 0;
     flex-grow: 1;
 }
 
-.compromisso-acoes {
+.compromisso-item-semanal {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: #2D546C6E;
+    margin-bottom: 8px;
 }
 
-.compromisso-acoes button {
-    padding: 6px 12px;
-    font-size: 13px;
+.compromisso-item-semanal:last-child {
+    margin-bottom: 0;
 }
+
+.sem-compromissos {
+    color: #95a5a6;
+    padding: 15px;
+    font-style: italic;
+    list-style-type: none;
+}
+
+.compromisso-detalhes { 
+    flex-grow: 1; 
+    color: #0D1231;
+    font-weight: lighter;
+}
+.compromisso-acoes { 
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px; 
+}
+.compromisso-acoes button { padding: 6px 12px; font-size: 13px; }
 
 .btn-deletar { background-color: #E74C3C; }
 .btn-deletar:hover { background-color: #c0392b; box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4); }
-
-.btn-editar { background-color: #F39C12; }
-.btn-editar:hover { background-color: #d68910; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4); }
+.btn-editar { background-color: #0D1231; }
+.btn-editar:hover { background-color: #01051f; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4); }
 
 .participantes-container { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
 .participante-tag { background-color: #e0e6ed; color: #555; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; }
@@ -198,9 +228,14 @@ input[type="text"]:focus, textarea:focus, select:focus {
 .modal-content { background-color: #fefefe; margin: 15% auto; padding: 25px; border: 1px solid #888; width: 80%; max-width: 550px; border-radius: 8px; position: relative; }
 .fechar-modal { color: #aaa; position: absolute; top: 10px; right: 25px; font-size: 28px; font-weight: bold; cursor: pointer; }
 
-
 /* --- RESPONSIVIDADE --- */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
+    #lista-compromissos {
+        /* Desmonta a grade e volta a ser uma lista vertical */
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
     body { padding: 10px; }
     .container { padding: 15px; }
     h1 { font-size: 1.8em; }
@@ -224,22 +259,10 @@ input[type="text"]:focus, textarea:focus, select:focus {
         padding: 15px;
     }
 
-    .compromisso-item-view {
-        flex-direction: column;
+    .dia-da-semana-container h3 { 
+        flex-direction: column; 
         align-items: flex-start;
-        gap: 10px;
-    }
-
-    .compromisso-dia {
-        flex-direction: row;
-        gap: 8px;
-        align-items: baseline;
-    }
-
-    .compromisso-acoes {
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: 10px;
+        gap: 5px; 
     }
     
     .modal-content {

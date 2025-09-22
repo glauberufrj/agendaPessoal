@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Compromisso</title>
-    <link rel="stylesheet" href="style.css">
     
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
 </head>
@@ -27,11 +28,13 @@
                 
                 <div class="input-group">
                     <label for="dataInicio">Início:</label>
-                    <input type="text" id="dataInicio" placeholder="Selecione data e hora..." required readonly>                </div>
+                    <input type="text" id="dataInicio" placeholder="Selecione data e hora..." required readonly>
+                </div>
                 
                 <div class="input-group">
                     <label for="dataFim">Fim (Opcional):</label>
-                    <input type="text" id="dataFim" placeholder="Selecione data e hora..." readonly>                </div>
+                    <input type="text" id="dataFim" placeholder="Selecione data e hora..." readonly>
+                </div>
 
                 <div class="input-group">
                     <label for="participantes">Participantes (separados por vírgula):</label>
@@ -41,19 +44,35 @@
                 <div class="input-group">
                     <label for="recorrencia">Recorrência:</label>
                     <select id="recorrencia">
-                        <option value="nenhuma">Não se repete</option>
-                        <option value="diaria">Diariamente</option>
+                        <option value="nenhuma" selected>Não se repete</option>
                         <option value="semanal">Semanalmente</option>
-                        <option value="mensal">Mensalmente</option>
                     </select>
+                </div>
+
+                <div id="opcoes-recorrencia" style="display: none;">
+                    <div class="input-group">
+                        <label for="dia_da_semana">Repetir toda:</label>
+                        <select id="dia_da_semana">
+                            <option value="1">Segunda-feira</option>
+                            <option value="2">Terça-feira</option>
+                            <option value="3">Quarta-feira</option>
+                            <option value="4">Quinta-feira</option>
+                            <option value="5">Sexta-feira</option>
+                            <option value="6">Sábado</option>
+                            <option value="0">Domingo</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="data_fim_recorrencia">Até a data de:</label>
+                        <input type="text" id="data_fim_recorrencia" placeholder="Selecione a data final..." readonly>
+                    </div>
                 </div>
                 
                 <textarea id="descricao" placeholder="Descrição (opcional)"></textarea>
                 <button type="submit">Adicionar Compromisso</button>
             </form>
         </div>
-
-        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
